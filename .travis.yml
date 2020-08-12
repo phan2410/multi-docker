@@ -1,0 +1,26 @@
+sudo: required
+services:
+    - docker
+
+before_install:
+    - docker build -t phan2410/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+    - docker run -e CI=true phan2410/react-test npm test
+
+after_success:
+    - docker build -t phan2410/multi-client ./client
+    - docker build -t phan2410/multi-nginx ./nginx
+    - docker build -t phan2410/multi-server ./server
+    - docker build -t phan2410/multi-worker ./worker
+    # Log in to the docker CLI
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    # Take those images and push them to docker hub
+    - docker push phan2410/multi-client
+    - docker push phan2410/multi-nginx
+    - docker push phan2410/multi-server
+    - docker push phan2410/multi-worker
+    
+
+
+    
